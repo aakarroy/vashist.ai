@@ -4,7 +4,7 @@ class Retriever:
         self.vector_store = vector_store
         self.embedding = embedding
 
-    def retrieve(self,query,top_k=10,score_threshold=0.0):
+    def retrieve(self,query,top_k=5,score_threshold=0.5):
         print(f"Query: {query}\n Top_k: {top_k}\n Score Threshold: {score_threshold}")
         time.sleep(1)
         query_embedding = self.embedding.generate_query_embeddings([query])

@@ -8,14 +8,19 @@ class CaptionGenerator:
     def __init__(self,model_name="microsoft/git-base"):
         print(f"Generating Captions via {model_name}")
         self.device = ("cuda" if torch.cuda.is_available() else "cpu")
+        if(self.device=="cpu"):
+            print("CPU is being used, which will results in longer wait time\n Kindly check hardware requirements and drivers to proceed.")
+            choice = input("Still want to proceed? Y/N").strip().upper()
+            if(choice!="Y"):
+                quit()
+
         self.torch_dtype = torch.float16 if self.device == "cuda" else torch.float32
         self.processor = AutoProcessor.from_pretrained(model_name, trust_remote_code=True)
         self.model = AutoModelForCausalLM.from_pretrained(
-            model_name, 
-            torch_dtype=self.torch_dtype,
-            trust_remote_code=True
+                model_name, 
+                torch_dtype=self.torch_dtype,
+                trust_remote_code=True
         ).to(self.device)
-        print(f"Model Parameter Device: {self.device.upper()}")
 
     def generate_caption(self,imgs):
         min_kb = 5
@@ -41,9 +46,9 @@ class CaptionGenerator:
                 with torch.no_grad():
                     generated_ids = self.model.generate(
                         pixel_values=inputs.pixel_values,
-                        max_length=100
+                        min_new_tokens = 20,
+                        max_new_tokens = 100
                     )
-
                     generated_text = self.processor.batch_decode(generated_ids, skip_special_tokens=True)[0]
 
                 captioned_images.append({
@@ -53,7 +58,3 @@ class CaptionGenerator:
                 })
 
         return captioned_images
-
-# imgs = [os.path.join("temp-images",i) for i in os.listdir("temp-images")]
-# cap = CaptionGenerator()
-# c = cap.generate_caption(imgs)

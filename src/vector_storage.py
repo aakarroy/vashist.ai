@@ -21,8 +21,6 @@ class VectorStore:
         )
         self.collection = self.client.get_or_create_collection(
             name = self.collection_name,
-            embedding_function=OpenCLIPEmbeddingFunction(),
-            data_loader=ImageLoader(),
             metadata={
                 "Description": "This is a multi model collection for storing textual and visual embeddings",
                 "hnsw:space": "cosine"}

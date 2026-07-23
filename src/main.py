@@ -10,7 +10,6 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
-
 def main():
     """Getting Sources"""
     PARENT_DIR = r"data"

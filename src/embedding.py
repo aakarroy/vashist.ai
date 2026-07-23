@@ -32,15 +32,3 @@ class Embeddings():
             caption_embedding.extend(response["embeddings"])
         return caption_embedding
 
-# all_doc = loader.all_doc
-# all_img = loader.imgs
-# # print(all_img)
-# # for i in all_img:
-# #     print(i)
-# chunks = chunking(all_doc)
-# embed = Embeddings()
-# img_embeddings = embed.generate_img_embedding(all_img)
-# text_embeddings = embed.generate_text_embedding(all_doc)
-# print(img_embeddings)
-# print(text_embeddings)
-

@@ -16,6 +16,7 @@ import time
 from pathlib import Path
 load_dotenv()
 
+TEMP_DIR = r".\temp-images"
 
 """Custom URL loader usig jina reader ai"""
 class UrlLoader(BaseLoader):
@@ -47,7 +48,7 @@ class UrlLoader(BaseLoader):
         except requests.exceptions.RequestException as e:
             print(f"Error in fetching url: {self.url}")
 
-    def get_images(self,markdown_content,save_dir = r".\temp-images"):
+    def get_images(self,markdown_content,save_dir = TEMP_DIR):
         os.makedirs(save_dir,exist_ok=True)
         images_urls = re.findall(r'!\[.*?\]\((.*?)\)',markdown_content)
 
@@ -82,7 +83,7 @@ class UrlLoader(BaseLoader):
         return local_img_paths
 
 class Loaders():
-    def __init__(self,sources:List[str],save_dir = r".\temp-images"):
+    def __init__(self,sources:List[str],save_dir = TEMP_DIR):
         self.sources = sources
         self.save_dir = save_dir
         """Dividing data depending on the file extension"""
@@ -118,7 +119,7 @@ class Loaders():
 
         self.convert_all_svgs_to_png(self.save_dir)
     
-    def convert_all_svgs_to_png(self,image_dir=r".\temp-images"):
+    def convert_all_svgs_to_png(self,image_dir=TEMP_DIR):
         """Converting SVGs to PNGs"""
         image_dir = Path(image_dir)
         svg_files = list(image_dir.glob("**/*.svg"))
@@ -208,18 +209,3 @@ class Loaders():
                 self.imgs.extend(loader.get_images(markdown_content=markdown_content))
             self.all_doc.extend(doc)
 
-
-# loader = Loaders(sources)
-# print(loader.imgs)
-# for i in loader.imgs:
-#     print(i["metadata"])
-        
-# loader = UrlLoader("https://lilianweng.github.io/posts/2018-06-24-attention/")
-# docs = list(loader.lazy_load())
-# if docs:
-#     print(docs)
-#     markdown_content = docs[0].page_content
-#     imgs = loader.get_images(markdown_content=markdown_content)
-#     print(imgs)
-#     print(docs)
-#     print(docs[0].page_content[:500])    
