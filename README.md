@@ -190,7 +190,7 @@ copy .env.example .env
 
 # Edit .env and add your keys
 JINA_API_KEY="your_jina_api_key_here"
-GEMINI_API_KEY="your_gemini_api_key_here"   # Optional, for future Gemini integration
+# These keys are required to just load data from URLs. If you only use local PDFs/PPTs, you can leave it blank. This is the only place where internet access is used. Except for this, all processing is local.
 ```
 
 ### 4. Add Your Study Materials
