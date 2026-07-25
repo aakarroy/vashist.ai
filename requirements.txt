@@ -20,3 +20,11 @@ tdqm
 ollama
 google-genai
 git+https://github.com/huggingface/transformers
+openpyxl
+docx2txt
+beautifulsoup4
+pytesseract
+python-docx
+msoffcrypto-tool
+pdfminer.six
+nltk

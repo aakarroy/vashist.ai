@@ -15,8 +15,8 @@ def main():
     PARENT_DIR = r"data"
     sources = [os.path.join(PARENT_DIR,_) for _ in os.listdir(PARENT_DIR)] #list containing all the data uploaded by the user. .pdf, .pptx and urls only
     sources.append(r"https://openai.com/index/clip/")
-    sources.append(r"https://llava-vl.github.io/")
-    sources.append(r"https://huggingface.co/blog/vlms")
+    # sources.append(r"https://llava-vl.github.io/")
+    # sources.append(r"https://huggingface.co/blog/vlms")
     
     if(not os.path.isdir("vector_store")):
         """Loading Data and Images from Sources"""

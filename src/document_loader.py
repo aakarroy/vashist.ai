@@ -1,4 +1,13 @@
-from langchain_community.document_loaders import PyMuPDFLoader, UnstructuredPowerPointLoader
+from langchain_community.document_loaders import (
+    PyMuPDFLoader, 
+    UnstructuredExcelLoader,
+    Docx2txtLoader,
+    BSHTMLLoader,
+    CSVLoader,
+    TextLoader
+)
+from unstructured.partition.pptx import partition_pptx
+
 from langchain_core.document_loaders import BaseLoader
 from langchain_core.documents import Document
 import os 
@@ -14,6 +23,7 @@ from pptx import Presentation
 from dotenv import load_dotenv
 import time
 from pathlib import Path
+import docx
 load_dotenv()
 
 TEMP_DIR = r".\temp-images"
@@ -92,6 +102,13 @@ class Loaders():
         self.pdfs = []
         self.ppts = []
         self.urls = []
+        self.excels = []
+        self.docs = []
+        self.htmls = []
+        self.csvs = []
+        self.txts = []
+        self.image_uploads = []
+
         for src in sources:
             src = src.lower()
             if(src.startswith(("https://","http://"))):
@@ -100,6 +117,19 @@ class Loaders():
                 self.pdfs.append(src)
             elif(src.endswith(".pptx")):
                 self.ppts.append(src)
+            elif(src.endswith(".xlsx") or src.endswith(".xls")):
+                self.excels.append(src)
+            elif(src.endswith(".docx") or src.endswith(".doc")):
+                self.docs.append(src)
+            elif(src.endswith(".html")):
+                self.htmls.append(src)
+            elif(src.endswith(".csv")):
+                self.csvs.append(src)
+            elif(src.endswith(".txt")):
+                self.txts.append(src)
+            elif(src.endswith(".png") or src.endswith(".jpg") or src.endswith(".jpeg")):
+                self.image_uploads.append(src)
+
 
         self.all_doc = []
         self.imgs = []
@@ -116,6 +146,31 @@ class Loaders():
             print(f"Gathering URLs..")
             time.sleep(1)
             self.url_loader()
+        if self.excels:
+            print(f"Gathering Excel files..")
+            time.sleep(1)
+            self.excel_loader()
+        if self.docs:
+            print(f"Gathering word documents..")
+            time.sleep(1)
+            self.word_loader()
+        if self.htmls:
+            print(f"Gathering HTMLs..")
+            time.sleep(1)
+            self.html_loader()
+        if self.csvs:
+            print(f"Gathering CSVs..")
+            time.sleep(1)
+            self.csv_loader()
+        if self.image_uploads:
+            print(f"Gathering Images..")
+            time.sleep(1)
+            self.image_loader()
+        if self.txts:
+            print(f"Gathering Images..")
+            time.sleep(1)
+            self.text_loader()
+        
 
         self.convert_all_svgs_to_png(self.save_dir)
     
@@ -162,6 +217,29 @@ class Loaders():
                     }
                 })
 
+    def get_doc_sync_images(self,file_path,):
+        print(f"Gathering images in Word doc {file_path}")
+        os.makedirs(self.save_dir, exist_ok=True)
+        doc = docx.Document(file_path)
+        for rel in doc.part.rels.values():
+            if "image" in rel.target_ref:
+                image_bytes = rel.target_part.blob
+                image_ext = rel.target_ref.split('.')[-1]
+                
+                filename = f"word_{uuid.uuid4()}.{image_ext}"
+                filepath = os.path.join(self.save_dir, filename)
+                
+                with open(filepath, "wb") as f:
+                    f.write(image_bytes)
+                
+                self.imgs.append({
+                    "image_path": filepath,
+                    "metadata": {
+                        "source": file_path,
+                        "type": "image"
+                    }
+                })
+
     def get_ppt_sync_images(self,file_path):
         print(f"Gathering images in PPT {file_path}")
         os.makedirs(self.save_dir,exist_ok=True)
@@ -186,6 +264,7 @@ class Loaders():
                     })
 
     def pdf_loader(self):
+        """Loads .pdf files."""
         for _ in self.pdfs:
             loader = PyMuPDFLoader(_)
             doc = loader.load()
@@ -193,13 +272,36 @@ class Loaders():
             self.all_doc.extend(doc)
 
     def ppt_loader(self):
+        """Loads .pptx files."""
         for _ in self.ppts:
-            loader = UnstructuredPowerPointLoader(_)
-            doc = loader.load()
-            self.get_ppt_sync_images(_)
-            self.all_doc.extend(doc)
+            try:
+                elements = partition_pptx(
+                    filename=_
+                )
+                all_text = []
+                for element in elements:
+                    text = str(element).strip()
+                    if text:
+                        all_text.append(text)
+                complete_text = "\n\n".join(all_text)
+                doc = Document(
+                    page_content=complete_text,
+                    metadata={
+                        "source": _,
+                        "type": "ppt"
+                    }
+                )
+                self.all_doc.append(doc)
+                self.get_ppt_sync_images(_)
+
+            except Exception as e:
+                print(
+                    f"Error processing PPT "
+                    f"{_}"
+                )
 
     def url_loader(self):
+        """Loads URLs"""
         for _ in self.urls:
             loader = UrlLoader(_)
             doc = list(loader.lazy_load())
@@ -209,3 +311,57 @@ class Loaders():
                 self.imgs.extend(loader.get_images(markdown_content=markdown_content))
             self.all_doc.extend(doc)
 
+    def excel_loader(self):
+        """Loads .xlsx and .xls files."""
+        for _ in self.excels:
+            loader = UnstructuredExcelLoader(_)
+            doc = loader.load()
+            self.all_doc.extend(doc)
+
+    def word_loader(self):
+        """Loads .docx and .doc files."""
+        for _ in self.docs:
+            loader = Docx2txtLoader(_)
+            doc = loader.load()
+            self.get_doc_sync_images(_)
+            self.all_doc.extend(doc)
+
+    def html_loader(self):
+        """Loads .html files."""
+        for _ in self.htmls:
+            loader = BSHTMLLoader(_)
+            doc = loader.load()
+            self.all_doc.extend(doc)
+
+    def csv_loader(self):
+        """Loads .csv files."""
+        for _ in self.csvs:
+            loader = CSVLoader(_) # CSVLoader loads each row as a separate document by default
+            doc = loader.load()
+            self.all_doc.extend(doc)
+
+    def text_loader(self):
+        """Loads .txt files."""
+        for _ in self.txts:
+            loader = TextLoader(_)
+            doc = loader.load()
+            self.all_doc.extend(doc)
+
+    def image_loader(self):
+        """Loads uploaded images .png .jpg and .jpeg"""
+        for _ in self.image_uploads:
+            self.imgs.append({
+                "image_path": _ ,
+                "metadata": {
+                "source": _ ,
+                "type": "image"
+                }
+            })
+# sources = [os.path.join(r"data",i) for i in os.listdir(r"data")]
+# sources.append(r"https://openai.com/index/clip/")
+# loader = Loaders(sources)
+# print("all loading done")
+# for i in loader.all_doc:
+#     if(type(i) is tuple):
+#         print(i)
+        

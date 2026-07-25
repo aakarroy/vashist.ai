@@ -60,6 +60,10 @@ def generation(retriver):
                     """
             response = llm.invoke(prompt)
             print(response.content)
+            if(texts):
+                print("\n=== Associated References ===")
+                for i in texts:
+                    print(i["metadata"]["source"])
             if images:
                 print("\n=== Associated Visual References ===")
                 for img in images:

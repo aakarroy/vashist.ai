@@ -4,7 +4,7 @@ class Retriever:
         self.vector_store = vector_store
         self.embedding = embedding
 
-    def retrieve(self,query,top_k=5,score_threshold=0.5):
+    def retrieve(self,query,top_k=3,score_threshold=0.5):
         print(f"Query: {query}\n Top_k: {top_k}\n Score Threshold: {score_threshold}")
         time.sleep(1)
         query_embedding = self.embedding.generate_query_embeddings([query])
@@ -29,7 +29,7 @@ class Retriever:
 
             for (doc,uri,dist,metadata,id) in (zip(documents,uris,distances,metadatas,ids)):
                 similarity_score = 1-dist
-                if(similarity_score>=score_threshold):
+                if(similarity_score > score_threshold):
                     if uri:
                         retrived_docs["images"].append({
                             "id" : id,
@@ -44,13 +44,10 @@ class Retriever:
                             "id" : id,
                             "distance" : dist,
                             "metadata" : metadata,
-                            "content" : doc
+                            "content" : doc,
                         })
             print(f"{len(retrived_docs["images"])} images retrieved\n {len(retrived_docs["texts"])} docs retrieved.")
             return retrived_docs
         else:
             print(f"No related documents found.")
             return retrived_docs
-        
-
-

@@ -46,7 +46,7 @@ class VectorStore:
                 ids = ids,
                 embeddings=embedding_list,
                 documents=document_text,
-                metadatas=metadatas
+                metadatas=metadatas,
             )
             
     def add_visuals(self,imgs,embeddings):
