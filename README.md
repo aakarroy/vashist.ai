@@ -34,7 +34,7 @@
 ```
                         ┌──────────────────────────────────────────────┐
                         │              DATA SOURCES                    │
-                        │   PDFs  |  PPTXs  |  URLs                   │
+                        │    PDFs  |  PPTXs  |  URLs                   │
                         └──────────────────┬───────────────────────────┘
                                            │
                                            ▼
@@ -54,31 +54,31 @@
                             │                         │
                             ▼                         ▼
                    ┌─────────────────────────────────────────────┐
-                   │           EMBEDDINGS (nomic-embed-text)      │
-                   │         via Ollama — Text & Caption          │
+                   │          EMBEDDINGS (nomic-embed-text)      │
+                   │          via Ollama — Text & Caption        │
                    └──────────────────────┬──────────────────────┘
                                           │
                                           ▼
                    ┌─────────────────────────────────────────────┐
-                   │        VECTOR STORE (ChromaDB)               │
-                   │   Persistent on disk · Cosine Similarity     │
-                   │   Unified collection for text + images       │
+                   │        VECTOR STORE (ChromaDB)              │
+                   │   Persistent on disk · Cosine Similarity    │
+                   │   Unified collection for text + images      │
                    └──────────────────────┬──────────────────────┘
                                           │
                               ┌───────────┘
                               │     At Query Time
                               ▼
                    ┌─────────────────────────────────────────────┐
-                   │             RETRIEVER                        │
-                   │  Embed query → Top-K search → Score filter   │
-                   │  Returns: relevant text chunks + image refs  │
+                   │             RETRIEVER                       │
+                   │  Embed query → Top-K search → Score filter  │
+                   │  Returns: relevant text chunks + image refs │
                    └──────────────────────┬──────────────────────┘
                                           │
                                           ▼
                    ┌─────────────────────────────────────────────┐
-                   │          GENERATION (Qwen2.5:3b)             │
-                   │  1. Meta-Prompt: determine expert persona    │
-                   │  2. Answer grounded in retrieved context     │
+                   │          GENERATION (Qwen2.5:3b)            │
+                   │  1. Meta-Prompt: determine expert persona   │
+                   │  2. Answer grounded in retrieved context    │
                    │  3. Fallback to LLM knowledge if no context │
                    └─────────────────────────────────────────────┘
 ```
@@ -324,29 +324,7 @@ Vashist AI is designed with privacy as a first principle:
 
 - All LLM inference happens **locally via Ollama** — no query or document content is sent to any remote LLM service
 - The only external API call is to **Jina Reader AI** for URL-based document loading (optional feature)
-- Your `data/`, `temp-images/`, `vector_store/`, and `.env` are all **gitignored** by default
 - No telemetry or usage tracking of any kind
-
----
-
-## Contributing
-
-Contributions are welcome! Here's how to get started:
-
-1. Fork the repository
-2. Create a feature branch (`git checkout -b feature/amazing-feature`)
-3. Make your changes
-4. Commit your changes (`git commit -m 'Add amazing feature'`)
-5. Push to the branch (`git push origin feature/amazing-feature`)
-6. Open a Pull Request
-
-Please make sure to update tests and documentation as appropriate.
-
----
-
-## License
-
-This project is licensed under the MIT License. See the [LICENSE](LICENSE) file for details.
 
 ---
 
