@@ -46,7 +46,7 @@ class Retriever:
                             "metadata" : metadata,
                             "content" : doc,
                         })
-            print(f"{len(retrived_docs["images"])} images retrieved\n {len(retrived_docs["texts"])} docs retrieved.")
+            print(f"{len(retrived_docs["images"])} images retrieved\n{len(retrived_docs["texts"])} docs retrieved.")
             return retrived_docs
         else:
             print(f"No related documents found.")

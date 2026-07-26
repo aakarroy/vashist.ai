@@ -1,10 +1,5 @@
 from langchain_community.document_loaders import (
     PyMuPDFLoader, 
-    UnstructuredExcelLoader,
-    Docx2txtLoader,
-    BSHTMLLoader,
-    CSVLoader,
-    TextLoader
 )
 from unstructured.partition.pptx import partition_pptx
 
@@ -23,10 +18,9 @@ from pptx import Presentation
 from dotenv import load_dotenv
 import time
 from pathlib import Path
-import docx
 load_dotenv()
 
-TEMP_DIR = r".\temp-images"
+TEMP_DIR = r".temp-images"
 
 """Custom URL loader usig jina reader ai"""
 class UrlLoader(BaseLoader):
@@ -117,18 +111,6 @@ class Loaders():
                 self.pdfs.append(src)
             elif(src.endswith(".pptx")):
                 self.ppts.append(src)
-            elif(src.endswith(".xlsx") or src.endswith(".xls")):
-                self.excels.append(src)
-            elif(src.endswith(".docx") or src.endswith(".doc")):
-                self.docs.append(src)
-            elif(src.endswith(".html")):
-                self.htmls.append(src)
-            elif(src.endswith(".csv")):
-                self.csvs.append(src)
-            elif(src.endswith(".txt")):
-                self.txts.append(src)
-            elif(src.endswith(".png") or src.endswith(".jpg") or src.endswith(".jpeg")):
-                self.image_uploads.append(src)
 
 
         self.all_doc = []
@@ -146,30 +128,6 @@ class Loaders():
             print(f"Gathering URLs..")
             time.sleep(1)
             self.url_loader()
-        if self.excels:
-            print(f"Gathering Excel files..")
-            time.sleep(1)
-            self.excel_loader()
-        if self.docs:
-            print(f"Gathering word documents..")
-            time.sleep(1)
-            self.word_loader()
-        if self.htmls:
-            print(f"Gathering HTMLs..")
-            time.sleep(1)
-            self.html_loader()
-        if self.csvs:
-            print(f"Gathering CSVs..")
-            time.sleep(1)
-            self.csv_loader()
-        if self.image_uploads:
-            print(f"Gathering Images..")
-            time.sleep(1)
-            self.image_loader()
-        if self.txts:
-            print(f"Gathering Images..")
-            time.sleep(1)
-            self.text_loader()
         
 
         self.convert_all_svgs_to_png(self.save_dir)
@@ -213,29 +171,6 @@ class Loaders():
                     "metadata": {
                         "source": file_path,
                         "page": page_num,
-                        "type": "image"
-                    }
-                })
-
-    def get_doc_sync_images(self,file_path,):
-        print(f"Gathering images in Word doc {file_path}")
-        os.makedirs(self.save_dir, exist_ok=True)
-        doc = docx.Document(file_path)
-        for rel in doc.part.rels.values():
-            if "image" in rel.target_ref:
-                image_bytes = rel.target_part.blob
-                image_ext = rel.target_ref.split('.')[-1]
-                
-                filename = f"word_{uuid.uuid4()}.{image_ext}"
-                filepath = os.path.join(self.save_dir, filename)
-                
-                with open(filepath, "wb") as f:
-                    f.write(image_bytes)
-                
-                self.imgs.append({
-                    "image_path": filepath,
-                    "metadata": {
-                        "source": file_path,
                         "type": "image"
                     }
                 })
@@ -310,58 +245,12 @@ class Loaders():
                 print(f"Gathering images in URLs..")
                 self.imgs.extend(loader.get_images(markdown_content=markdown_content))
             self.all_doc.extend(doc)
-
-    def excel_loader(self):
-        """Loads .xlsx and .xls files."""
-        for _ in self.excels:
-            loader = UnstructuredExcelLoader(_)
-            doc = loader.load()
-            self.all_doc.extend(doc)
-
-    def word_loader(self):
-        """Loads .docx and .doc files."""
-        for _ in self.docs:
-            loader = Docx2txtLoader(_)
-            doc = loader.load()
-            self.get_doc_sync_images(_)
-            self.all_doc.extend(doc)
-
-    def html_loader(self):
-        """Loads .html files."""
-        for _ in self.htmls:
-            loader = BSHTMLLoader(_)
-            doc = loader.load()
-            self.all_doc.extend(doc)
-
-    def csv_loader(self):
-        """Loads .csv files."""
-        for _ in self.csvs:
-            loader = CSVLoader(_) # CSVLoader loads each row as a separate document by default
-            doc = loader.load()
-            self.all_doc.extend(doc)
-
-    def text_loader(self):
-        """Loads .txt files."""
-        for _ in self.txts:
-            loader = TextLoader(_)
-            doc = loader.load()
-            self.all_doc.extend(doc)
-
-    def image_loader(self):
-        """Loads uploaded images .png .jpg and .jpeg"""
-        for _ in self.image_uploads:
-            self.imgs.append({
-                "image_path": _ ,
-                "metadata": {
-                "source": _ ,
-                "type": "image"
-                }
-            })
-# sources = [os.path.join(r"data",i) for i in os.listdir(r"data")]
+            
+# PARENT_DIR = r"vashist.ai\data"
+# sources = [os.path.join(PARENT_DIR,_) for _ in os.listdir(PARENT_DIR)] #list containing all the data uploaded by the user. .pdf, .pptx and urls only
 # sources.append(r"https://openai.com/index/clip/")
+
 # loader = Loaders(sources)
-# print("all loading done")
-# for i in loader.all_doc:
-#     if(type(i) is tuple):
-#         print(i)
-        
+# docs = loader.all_doc
+# for i in docs:
+#     print(i.metadata)

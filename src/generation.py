@@ -63,7 +63,10 @@ def generation(retriver):
             if(texts):
                 print("\n=== Associated References ===")
                 for i in texts:
-                    print(i["metadata"]["source"])
+                    if("page" in i["metadata"]):  
+                        print(f"{i["metadata"]["source"]} Page:{i["metadata"]["page"]}")
+                    else:
+                         print(f"{i["metadata"]["source"]}")
             if images:
                 print("\n=== Associated Visual References ===")
                 for img in images:
