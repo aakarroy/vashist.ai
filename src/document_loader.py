@@ -2,7 +2,6 @@ from langchain_community.document_loaders import (
     PyMuPDFLoader, 
 )
 from unstructured.partition.pptx import partition_pptx
-
 from langchain_core.document_loaders import BaseLoader
 from langchain_core.documents import Document
 import os 
@@ -96,11 +95,6 @@ class Loaders():
         self.pdfs = []
         self.ppts = []
         self.urls = []
-        self.excels = []
-        self.docs = []
-        self.htmls = []
-        self.csvs = []
-        self.txts = []
         self.image_uploads = []
 
         for src in sources:
@@ -111,7 +105,6 @@ class Loaders():
                 self.pdfs.append(src)
             elif(src.endswith(".pptx")):
                 self.ppts.append(src)
-
 
         self.all_doc = []
         self.imgs = []
@@ -129,7 +122,6 @@ class Loaders():
             time.sleep(1)
             self.url_loader()
         
-
         self.convert_all_svgs_to_png(self.save_dir)
     
     def convert_all_svgs_to_png(self,image_dir=TEMP_DIR):
@@ -148,7 +140,6 @@ class Loaders():
             doc.close()
             print(f"Converted: {svg_path.name} -> {png_path.name}")
             svg_path.unlink()
-            
     
     def get_pdf_sync_images(self,file_path,):
         print(f"Gathering images in PDF {file_path}")
@@ -245,12 +236,3 @@ class Loaders():
                 print(f"Gathering images in URLs..")
                 self.imgs.extend(loader.get_images(markdown_content=markdown_content))
             self.all_doc.extend(doc)
-            
-# PARENT_DIR = r"vashist.ai\data"
-# sources = [os.path.join(PARENT_DIR,_) for _ in os.listdir(PARENT_DIR)] #list containing all the data uploaded by the user. .pdf, .pptx and urls only
-# sources.append(r"https://openai.com/index/clip/")
-
-# loader = Loaders(sources)
-# docs = loader.all_doc
-# for i in docs:
-#     print(i.metadata)

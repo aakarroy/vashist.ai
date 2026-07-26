@@ -143,6 +143,8 @@ vashist/
 4. **Grounded Answer Generation** — The LLM then answers the user's question while staying in the expert persona, using the retrieved text and image captions as context.
 5. **Fallback** — If no context is retrieved, the LLM answers from its own training knowledge while still adopting the most appropriate expert persona.
 6. **Image References** — Paths to any retrieved visual assets are printed alongside the answer.
+7. **Docs Reference** — The answer includes references to the original documents (PDF/PPT/URL) from which the context was retrieved.
+8. **Repeat** — The user can ask follow-up questions, and the loop continues until the user types `quit`.
 
 ---
 
@@ -152,7 +154,7 @@ vashist/
 
 | Requirement | Details |
 |---|---|
-| **Python** | 3.14+ (see `.python-version`) |
+| **Python** | 3.12+ (see `.python-version`) |
 | **Ollama** | Must be installed and running locally |
 | **CUDA GPU** (optional) | Required for fast image captioning; CPU fallback available |
 | **Jina API Key** | For URL ingestion — [get one free here](https://jina.ai) |
@@ -232,36 +234,11 @@ Type `quit` to exit.
 
 ---
 
-## Dependencies
-
-| Package | Purpose |
-|---|---|
-| `langchain`, `langchain-community`, `langchain-core` | Document loaders, text splitter orchestration |
-| `langchain-ollama` | LangChain integration for Ollama LLMs |
-| `ollama` | Python client for local Ollama models |
-| `chromadb` | Persistent local vector database |
-| `PyMuPDF` (`fitz`) | PDF parsing & image extraction, SVG→PNG conversion |
-| `python-pptx` | PowerPoint file parsing & image extraction |
-| `unstructured` | Unstructured PowerPoint document loader |
-| `transformers` | HuggingFace model loading (captioner + tokenizer) |
-| `torch` + `torchvision` | Deep learning backend for image captioning |
-| `pillow` | Image processing |
-| `open-clip-torch` | OpenCLIP embedding utilities |
-| `timm` | Vision model backbone |
-| `einops` | Tensor manipulation for vision models |
-| `tiktoken` | Token counting utilities |
-| `httpx`, `requests` | HTTP clients for URL fetching |
-| `python-dotenv` | `.env` file loading |
-| `tqdm` | Progress bars |
-
----
-
 ## Environment Variables
 
 | Variable | Required | Description |
 |---|---|---|
 | `JINA_API_KEY` | **Yes** (for URL ingestion) | API key for [Jina Reader AI](https://jina.ai/reader/) used to convert web pages to clean markdown |
-| `GEMINI_API_KEY` | No (future use) | Google Gemini API key for potential cloud LLM integration |
 
 ---
 
