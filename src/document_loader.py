@@ -17,14 +17,19 @@ from pptx import Presentation
 from dotenv import load_dotenv
 import time
 from pathlib import Path
+from config import get_settings
+import logging
 load_dotenv()
 
 TEMP_DIR = r".temp-images"
 
+settings = get_settings()
+logger = logging.getLogger(__name__)
+
 """Custom URL loader usig jina reader ai"""
 class UrlLoader(BaseLoader):
     def __init__(self,url):
-        self.api_key = os.getenv("JINA_API_KEY")
+        self.api_key = settings.jina_api_key
         self.url = url
         self.jina_url = f"https://r.jina.ai/{url}"
     
@@ -90,7 +95,7 @@ class Loaders():
         self.sources = sources
         self.save_dir = save_dir
         """Dividing data depending on the file extension"""
-        print(f"Reading sources and separating them....")
+        logger.info(f"Reading sources and separating them....")
         time.sleep(1)
         self.pdfs = []
         self.ppts = []
@@ -110,15 +115,15 @@ class Loaders():
         self.imgs = []
 
         if self.pdfs:
-            print(f"Gathering PDFs..")
+            logger.info(f"Gathering PDFs..")
             time.sleep(1)
             self.pdf_loader()
         if self.ppts:
-            print(f"Gathering PPTs..")
+            logger.info(f"Gathering PPTs..")
             time.sleep(1)
             self.ppt_loader()
         if self.urls:
-            print(f"Gathering URLs..")
+            logger.info(f"Gathering URLs..")
             time.sleep(1)
             self.url_loader()
         
@@ -129,7 +134,7 @@ class Loaders():
         image_dir = Path(image_dir)
         svg_files = list(image_dir.glob("**/*.svg"))
         
-        print(f"Found {len(svg_files)} SVG files to convert...")
+        logger.warning(f"Found {len(svg_files)} SVG files to convert...")
         
         for svg_path in svg_files:
             png_path = svg_path.with_suffix(".png")
@@ -138,11 +143,11 @@ class Loaders():
             pix = page.get_pixmap()
             pix.save(str(png_path))
             doc.close()
-            print(f"Converted: {svg_path.name} -> {png_path.name}")
+            logger.info(f"Converted: {svg_path.name} -> {png_path.name}")
             svg_path.unlink()
     
     def get_pdf_sync_images(self,file_path,):
-        print(f"Gathering images in PDF {file_path}")
+        logger.info(f"Gathering images in PDF {file_path}")
         os.makedirs(self.save_dir,exist_ok=True)
         source_document = fitz.open(file_path)
         for page_num in range(len(source_document)):
@@ -167,7 +172,7 @@ class Loaders():
                 })
 
     def get_ppt_sync_images(self,file_path):
-        print(f"Gathering images in PPT {file_path}")
+        logger.info(f"Gathering images in PPT {file_path}")
         os.makedirs(self.save_dir,exist_ok=True)
         prs = Presentation(file_path)
         for slide_num, slide in enumerate(prs.slides):
@@ -191,6 +196,7 @@ class Loaders():
 
     def pdf_loader(self):
         """Loads .pdf files."""
+        logger.info(f"Loading PDFs....")
         for _ in self.pdfs:
             loader = PyMuPDFLoader(_)
             doc = loader.load()
@@ -199,6 +205,7 @@ class Loaders():
 
     def ppt_loader(self):
         """Loads .pptx files."""
+        logger.info(f"Loading PPTs....")
         for _ in self.ppts:
             try:
                 elements = partition_pptx(
@@ -228,6 +235,7 @@ class Loaders():
 
     def url_loader(self):
         """Loads URLs"""
+        logger.info(f"Loading URLs....")
         for _ in self.urls:
             loader = UrlLoader(_)
             doc = list(loader.lazy_load())

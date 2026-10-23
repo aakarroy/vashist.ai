@@ -28,3 +28,4 @@ python-docx
 msoffcrypto-tool
 pdfminer.six
 nltk
+asyncio
