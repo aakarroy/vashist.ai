@@ -1,5 +1,10 @@
 from langchain_ollama import ChatOllama
+from security import OutPutValidator
+import logging
 import json
+
+logger = logging.getLogger(__name__)
+outputvalidator = OutPutValidator()
 
 llm = ChatOllama(
         model="Qwen2.5:3b",
@@ -35,22 +40,18 @@ def multi_query(query:str):
     print(all_queries)
     return list(set([all_queries[0],all_queries[1],all_queries[2]]))    
 
-def generation(retriver):
-    while(True):
-        query = input("Enter your Question: ")
-        if(query=="quit"):
-            quit()
-        all_queries = multi_query(query)
-        texts = []
-        images = []
-        for _ in all_queries:
-            results = retriver.retrieve(query)
-            texts.extend(results["texts"])
-            images.extend(results["images"])
-        if (len(texts)!=0 or len(images)!=0) :
-            context_textual = "\n\n".join(doc['content'] for doc in texts if doc['content'])
-            context_visual = "\n\n".join(doc["caption"] for doc in images)
-            role_prompt = f""" 
+def generation(retriver,query):
+    all_queries = multi_query(query)
+    texts = []
+    images = []
+    for _ in all_queries:
+        results = retriver.retrieve(query)
+        texts.extend(results["texts"])
+        images.extend(results["images"])
+    if (len(texts)!=0 or len(images)!=0) :
+        context_textual = "\n\n".join(doc['content'] for doc in texts if doc['content'])
+        context_visual = "\n\n".join(doc["caption"] for doc in images)
+        role_prompt = f""" 
                     You are an expert Meta-Prompt Engine. Your sole task is to analyze the provided context (text documents and visual descriptions) and determine the single most appropriate expert persona/role an AI assistant should adopt to explain or answer questions about this material.
                     =========================================
                     <USER_QUERY>
@@ -70,10 +71,10 @@ def generation(retriver):
                     - AI Expert
             
                     Target Persona:"""
-            response = llm.invoke(role_prompt)
-            role = response.content
-            print(f"Acting as {role}")            
-            prompt = f"""Act as the following expert: {role}.
+        response = llm.invoke(role_prompt)
+        role = response.content
+        print(f"Acting as {role}")            
+        prompt = f"""Act as the following expert: {role}.
                     Your task is to answer the user's question based strictly on the provided textual and visual context. Maintain your expert persona throughout the explanation.
                    STRICT FORMATTING & TONE RULES:
                     1. Start your response IMMEDIATELY with the answer. 
@@ -89,27 +90,30 @@ def generation(retriver):
                     Question: {query}
                     Provide your expert answer:
                     """
-            response = llm.invoke(prompt)
-            print(response.content)
-            if(texts):
-                print("\n=== Associated References ===")
-                for i in texts:
-                    if("page" in i["metadata"]):  
-                        print(f"{i["metadata"]["source"]} Page:{i["metadata"]["page"]}")
-                    else:
-                         print(f"{i["metadata"]["source"]}")
-            if images:
-                print("\n=== Associated Visual References ===")
-                for img in images:
-                    print(f"- Image Path: {img['uri']}")
-        else:
-            print(f"No context was found so LLM is using its own knowledge.")
-            prompt = f"""
+        response = llm.invoke(prompt)
+        output, warning = outputvalidator.detect(response)
+        if warning:
+            logger.warning(f"OUTPUT GENERATED HAS SEVERAL WARNINGS: {warning}")
+        print(output)
+        if(texts):
+            print("\n=== Associated References ===")
+            for i in texts:
+                if("page" in i["metadata"]):  
+                    print(f"{i["metadata"]["source"]} Page:{i["metadata"]["page"]}")
+                else:
+                     print(f"{i["metadata"]["source"]}")
+        if images:
+            print("\n=== Associated Visual References ===")
+            for img in images:
+                print(f"- Image Path: {img['uri']}")
+    else:
+        print(f"No context was found so LLM is using its own knowledge.")
+        prompt = f"""
                         Question: {query}
                         Provide your expert answer:
                         """
-            response = llm.invoke(prompt)
-            print(response.content)
+        response = llm.invoke(prompt)
+        print(response.content)
             
 
 

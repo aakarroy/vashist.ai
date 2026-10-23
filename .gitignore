@@ -1,0 +1,10 @@
+data
+v
+.temp-images
+vector_store
+.env
+to_do_more.md
+.vscode
+cli
+ndcg.py
+UI/
