@@ -1,10 +1,12 @@
 from langchain_ollama import ChatOllama
 from security import OutPutValidator
+from cache import CacheLayer
 import logging
 import json
 
 logger = logging.getLogger(__name__)
 outputvalidator = OutPutValidator()
+cached = CacheLayer()
 
 llm = ChatOllama(
         model="Qwen2.5:3b",
@@ -95,6 +97,7 @@ def generation(retriver,query):
         if warning:
             logger.warning(f"OUTPUT GENERATED HAS SEVERAL WARNINGS: {warning}")
         print(output)
+        cached.set(query,output)
         if(texts):
             print("\n=== Associated References ===")
             for i in texts:
@@ -114,6 +117,7 @@ def generation(retriver,query):
                         """
         response = llm.invoke(prompt)
         print(response.content)
+        cached.set(query,response.content)
             
 
 

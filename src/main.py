@@ -10,6 +10,7 @@ from dotenv import load_dotenv
 from security import PIIDetector
 import logging
 from config import get_settings
+from cache import CacheLayer
 
 settings = get_settings()
 
@@ -62,6 +63,7 @@ def main():
     vector_store = VectorStore()
     retriever = Retriever(vector_store,embedding)
     piidetector = PIIDetector()
+    cached = CacheLayer()
     
     # """Generation"""
     while(True):
@@ -72,7 +74,10 @@ def main():
         if found:
             logger.warning(f"PII Detected of Type : {found.keys}")
         masked_query = piidetector.mask(query)
-        generation(retriever,masked_query)
+        if(cached.get(masked_query)==None):
+            generation(retriever,masked_query)
+            continue;
+        print(cached.get(masked_query))
 
 if __name__ == "__main__":
     main()
