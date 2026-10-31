@@ -2,14 +2,20 @@ import tqdm
 from PIL import Image
 import os
 import torch
+import logging
 from transformers import AutoProcessor, AutoModelForCausalLM
+
+logger = logging.getLogger(__name__)
 
 class CaptionGenerator:
     def __init__(self,model_name="microsoft/git-base"):
-        print(f"Generating Captions via {model_name}")
+        # print(f"Generating Captions via {model_name}")
+        logger.info(f"Generating Captions via {model_name}")
         self.device = ("cuda" if torch.cuda.is_available() else "cpu")
         if(self.device=="cpu"):
-            print("CPU is being used, which will results in longer wait time\n Kindly check hardware requirements and drivers to proceed.")
+            # print()'
+            logger.error("No GPU Found")
+            logger.warning("CPU is being used, which will results in longer wait time\n Kindly check hardware requirements and drivers to proceed.")
             choice = input("Still want to proceed? Y/N").strip().upper()
             if(choice!="Y"):
                 quit()
@@ -38,6 +44,7 @@ class CaptionGenerator:
                     valid_images.append(img)
         imgs = valid_images 
         captioned_images = []
+        logger.info(f"Generating Captions....")
         for img in tqdm.tqdm(imgs,desc="Captioning Images"):
             img_path = img["image_path"]
             with Image.open(img_path).convert("RGB") as pil_img:

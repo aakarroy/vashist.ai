@@ -14,6 +14,7 @@ llm = ChatOllama(
     )
 
 def multi_query(query:str):
+    
     multi_query_prompt = f"""
         You are an AI assistant tasked with optimizing search queries for a vector-based Retrieval-Augmented Generation (RAG) system. 
         Your goal is to take a single user query and break it down or generate 3 distinct alternative versions of it. These variations should:
@@ -26,7 +27,7 @@ def multi_query(query:str):
         <ORIGINAL_USER_QUERY>
         =========================================
         OUTPUT FORMAT:
-        Return strictly a valid JSON object with a single key "queries" containing an array of exactly 3 string queries not any more than that. Do not include any intro, explanation, or markdown backticks outside the JSON.
+        Return strictly a valid JSON object with a single key "queries" containing an array of exactly 2 string queries not any more than that. Do not include any intro, explanation, or markdown backticks outside the JSON.
 
         Example Output:
         "queries": [
@@ -39,6 +40,7 @@ def multi_query(query:str):
     data = json.loads(reponse.content)
     sub_queries = data.get("queries",[])
     all_queries = [query] + sub_queries
+    logger.info("Creating Multiple Queries out of single Query")
     print(all_queries)
     return list(set([all_queries[0],all_queries[1],all_queries[2]]))    
 
@@ -46,10 +48,12 @@ def generation(retriver,query):
     all_queries = multi_query(query)
     texts = []
     images = []
+    logger.info("Generating Response for All queries...")
     for _ in all_queries:
         results = retriver.retrieve(query)
         texts.extend(results["texts"])
         images.extend(results["images"])
+    logger.info("Gathering Context from Retriever...")
     if (len(texts)!=0 or len(images)!=0) :
         context_textual = "\n\n".join(doc['content'] for doc in texts if doc['content'])
         context_visual = "\n\n".join(doc["caption"] for doc in images)
@@ -75,6 +79,7 @@ def generation(retriver,query):
                     Target Persona:"""
         response = llm.invoke(role_prompt)
         role = response.content
+        logger.info("Adding Query Specific Role to the LLM...")
         print(f"Acting as {role}")            
         prompt = f"""Act as the following expert: {role}.
                     Your task is to answer the user's question based strictly on the provided textual and visual context. Maintain your expert persona throughout the explanation.
@@ -96,6 +101,7 @@ def generation(retriver,query):
         output, warning = outputvalidator.detect(response)
         if warning:
             logger.warning(f"OUTPUT GENERATED HAS SEVERAL WARNINGS: {warning}")
+        logger.info("Generating Response...")
         print(output)
         cached.set(query,output)
         if(texts):
@@ -110,7 +116,8 @@ def generation(retriver,query):
             for img in images:
                 print(f"- Image Path: {img['uri']}")
     else:
-        print(f"No context was found so LLM is using its own knowledge.")
+        # print(f"No context was found so LLM is using its own knowledge.")
+        logger.warning("No context was found so LLM is using its own knowledge.")
         prompt = f"""
                         Question: {query}
                         Provide your expert answer:

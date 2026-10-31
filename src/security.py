@@ -1,4 +1,7 @@
 import re
+import logging
+
+logger = logging.getLogger(__name__)
 
 class PIIDetector:
 
@@ -21,14 +24,17 @@ class PIIDetector:
 
     def detect(self,text):
         found = {}
+        logger.info("Detecting PII Indicators in user Query...")
         for pii_type, pattern in self.PATTERNS.items():
             matches = re.findall(pattern,text)
             if matches:
                 found[pii_type] = matches
+        logger.warning(f"{len(found)} PII Indicators exist in Query")
         return found
 
     def mask(self,text):
         masked = text
+        logger.info("Masking PII Indicators...")
         for pii_type, pattern in self.PATTERNS.items():
             masked = re.sub(pattern,self.MASK_MAP[pii_type],masked)
         return masked
@@ -45,6 +51,7 @@ class OutPutValidator:
 
     def detect(self,text):
         warnings = []
+        logger.info("Detecting PII Indicators in user Output...")
         found = self.piidetector.detect(text)
         if found:
             warnings.append(found.keys)
@@ -55,6 +62,7 @@ class OutPutValidator:
                 warnings.append("Harmfull Content Blocked")
                 masked = "[Response blocked: Potentially Harmful Content]"
                 break
-            
+        
+        logger.warning(f"{len(found)} PII Indicators exist in Output")    
         return masked, warnings
 

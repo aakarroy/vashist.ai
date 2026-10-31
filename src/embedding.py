@@ -1,18 +1,23 @@
 import ollama
 import time
 import tqdm
+import logging
+
+logger = logging.getLogger(__name__)
 class Embeddings():
     def __init__(self,model_name="nomic-embed-text"):
         self.model_name = model_name
     
     def generate_query_embeddings(self,query):
-        print("Generating Query Embeddings...")
+        # print("Generating Query Embeddings...")
+        logger.info("Generating Query Embeddings...")
         time.sleep(1)
         response = ollama.embed(model=self.model_name, input=query)
         return response["embeddings"][0]
 
     def generate_text_embedding(self,chunks,batch_size=16):
-        print("Generating Text Embeddings...")
+        # print("Generating Text Embeddings...")
+        logger.info("Generating Text Embeddings...")
         time.sleep(1)
         texts = [chunk.page_content for chunk in chunks]
         text_embedding = []
@@ -23,7 +28,8 @@ class Embeddings():
         return text_embedding    
 
     def generate_caption_embedding(self,imgs,batch_size=16):
-        print("Generating Visual Embeddings...")
+        # print("Generating Visual Embeddings...")
+        logger.info("Generating Visual Embeddings...")
         captions = [img["caption"] for img in imgs]
         caption_embedding = []
         for i in tqdm.tqdm(range(0,len(captions),batch_size),desc="Encoding Images Captions"):

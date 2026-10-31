@@ -3,15 +3,19 @@ from chromadb import PersistentClient
 from chromadb.utils.embedding_functions import OpenCLIPEmbeddingFunction
 from chromadb.utils.data_loaders import ImageLoader
 import uuid
+import logging
+
+logger = logging.getLogger(__name__)
 
 
 class VectorStore:
     def __init__(self,collection_name="Multi_Media_Storage",persistent_dir="vector_store"):
-        print(f"Initializing Vector Storage at {persistent_dir}")
+        # print(f"Initializing Vector Storage at {persistent_dir}")
         self.collection_name = collection_name
         self.persistent_dir = persistent_dir
         self.client = None
         self.collection = None
+        logger.info(f"Initializing Vector Storage at {persistent_dir}")
         self._initialise_store()
     
     def _initialise_store(self):
@@ -27,7 +31,8 @@ class VectorStore:
         )
 
     def add_documents(self,docs,embeddings):
-        print(f"Adding documents and their embedings in vector store")
+        # print(f"Adding documents and their embedings in vector store")
+        logger.info(f"Adding documents and their embedings in vector store")
         ids = []
         metadatas = []
         document_text = []
@@ -50,7 +55,8 @@ class VectorStore:
             )
             
     def add_visuals(self,imgs,embeddings):
-        print(f"Adding images and their embedings in vector store")
+        # print(f"Adding images and their embedings in vector store")
+        logger.info(f"Adding images and their embedings in vector store")
         ids = []
         metadatas = []
         caption_text = []
