@@ -1,9 +1,3 @@
-from langchain_community.document_loaders import (
-    PyMuPDFLoader, 
-)
-from unstructured.partition.pptx import partition_pptx
-from langchain_core.document_loaders import BaseLoader
-from langchain_core.documents import Document
 import os 
 import uuid
 import requests
@@ -13,9 +7,16 @@ from urllib.parse import urljoin
 import os
 import re
 import fitz
+import time
+from langchain_community.document_loaders import (
+    PyMuPDFLoader, 
+)
+from unstructured.partition.pptx import partition_pptx
+from langchain_core.document_loaders import BaseLoader
+from langchain_core.documents import Document
+
 from pptx import Presentation
 from dotenv import load_dotenv
-import time
 from pathlib import Path
 from config import get_settings
 import logging
@@ -149,39 +150,17 @@ class Loaders():
     def get_pdf_sync_images(self,file_path,):
         logger.info(f"Gathering images in PDF {file_path}")
         os.makedirs(self.save_dir,exist_ok=True)
-        source_document = fitz.open(file_path)
-        for page_num in range(len(source_document)):
-            page = source_document[page_num]
-            image_list = page.get_images(full=True)
-            for img in image_list:
-                xref = img[0]
-                base_image = source_document.extract_image(xref)
-                image_bytes = base_image["image"]
-                image_ext = base_image["ext"]
-                filename = f"pdf_{uuid.uuid4()}.{image_ext}"
-                filepath = os.path.join(self.save_dir, filename)
-                with open(filepath, "wb") as f:
-                    f.write(image_bytes)
-                self.imgs.append({
-                    "image_path": filepath,
-                    "metadata": {
-                        "source": file_path,
-                        "page": page_num,
-                        "type": "image"
-                    }
-                })
-
-    def get_ppt_sync_images(self,file_path):
-        logger.info(f"Gathering images in PPT {file_path}")
-        os.makedirs(self.save_dir,exist_ok=True)
-        prs = Presentation(file_path)
-        for slide_num, slide in enumerate(prs.slides):
-            for shape in slide.shapes:
-                if hasattr(shape, "image"): 
-                    image = shape.image
-                    image_bytes = image.blob
-                    image_ext = image.ext
-                    filename = f"ppt_{uuid.uuid4()}.{image_ext}"
+        try:
+            source_document = fitz.open(file_path)
+            for page_num in range(len(source_document)):
+                page = source_document[page_num]
+                image_list = page.get_images(full=True)
+                for img in image_list:
+                    xref = img[0]
+                    base_image = source_document.extract_image(xref)
+                    image_bytes = base_image["image"]
+                    image_ext = base_image["ext"]
+                    filename = f"pdf_{uuid.uuid4()}.{image_ext}"
                     filepath = os.path.join(self.save_dir, filename)
                     with open(filepath, "wb") as f:
                         f.write(image_bytes)
@@ -189,19 +168,50 @@ class Loaders():
                         "image_path": filepath,
                         "metadata": {
                             "source": file_path,
-                            "page": slide_num,
+                            "page": page_num,
                             "type": "image"
                         }
                     })
+        except Exception as e:
+            logger.critical(f"Gathering images in PDF failed {e}")
+
+    def get_ppt_sync_images(self,file_path):
+        logger.info(f"Gathering images in PPT {file_path}")
+        os.makedirs(self.save_dir,exist_ok=True)
+        try:
+            prs = Presentation(file_path)
+            for slide_num, slide in enumerate(prs.slides):
+                for shape in slide.shapes:
+                    if hasattr(shape, "image"): 
+                        image = shape.image
+                        image_bytes = image.blob
+                        image_ext = image.ext
+                        filename = f"ppt_{uuid.uuid4()}.{image_ext}"
+                        filepath = os.path.join(self.save_dir, filename)
+                        with open(filepath, "wb") as f:
+                            f.write(image_bytes)
+                        self.imgs.append({
+                            "image_path": filepath,
+                            "metadata": {
+                                "source": file_path,
+                                "page": slide_num,
+                                "type": "image"
+                            }
+                        })
+        except Exception as e:
+            logger.critical(f"Gathering images in PPT failed {e}")
 
     def pdf_loader(self):
         """Loads .pdf files."""
         logger.info(f"Loading PDFs....")
         for _ in self.pdfs:
-            loader = PyMuPDFLoader(_)
-            doc = loader.load()
-            self.get_pdf_sync_images(_)
-            self.all_doc.extend(doc)
+            try:
+                loader = PyMuPDFLoader(_)
+                doc = loader.load()
+                self.get_pdf_sync_images(_)
+                self.all_doc.extend(doc)
+            except Exception as e:
+                logger.critical(f"Loading PDFs Failed {e}")
 
     def ppt_loader(self):
         """Loads .pptx files."""
@@ -236,11 +246,14 @@ class Loaders():
     def url_loader(self):
         """Loads URLs"""
         logger.info(f"Loading URLs....")
-        for _ in self.urls:
-            loader = UrlLoader(_)
-            doc = list(loader.lazy_load())
-            for i in range(len(doc)):
-                markdown_content = doc[i].page_content
-                print(f"Gathering images in URLs..")
-                self.imgs.extend(loader.get_images(markdown_content=markdown_content))
-            self.all_doc.extend(doc)
+        try:
+            for _ in self.urls:
+                loader = UrlLoader(_)
+                doc = list(loader.lazy_load())
+                for i in range(len(doc)):
+                    markdown_content = doc[i].page_content
+                    print(f"Gathering images in URLs..")
+                    self.imgs.extend(loader.get_images(markdown_content=markdown_content))
+                self.all_doc.extend(doc)
+        except Exception as e:
+                logger.critical(f"Loading PDFs Failed {e}")

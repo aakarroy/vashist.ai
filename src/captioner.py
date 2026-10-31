@@ -21,12 +21,15 @@ class CaptionGenerator:
                 quit()
 
         self.torch_dtype = torch.float16 if self.device == "cuda" else torch.float32
-        self.processor = AutoProcessor.from_pretrained(model_name, trust_remote_code=True)
-        self.model = AutoModelForCausalLM.from_pretrained(
-                model_name, 
-                torch_dtype=self.torch_dtype,
-                trust_remote_code=True
-        ).to(self.device)
+        try:
+            self.processor = AutoProcessor.from_pretrained(model_name, trust_remote_code=True)
+            self.model = AutoModelForCausalLM.from_pretrained(
+                    model_name, 
+                    torch_dtype=self.torch_dtype,
+                    trust_remote_code=True
+            ).to(self.device)
+        except Exception as e:
+            logger.critical("Loading Captioning Model Failed.")
 
     def generate_caption(self,imgs):
         min_kb = 5

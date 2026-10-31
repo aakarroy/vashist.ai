@@ -8,3 +8,4 @@ to_do_more.md
 cli
 ndcg.py
 UI/
+src/__pycache__/

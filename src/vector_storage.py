@@ -1,9 +1,9 @@
 import os
+import uuid
+import logging
 from chromadb import PersistentClient
 from chromadb.utils.embedding_functions import OpenCLIPEmbeddingFunction
 from chromadb.utils.data_loaders import ImageLoader
-import uuid
-import logging
 
 logger = logging.getLogger(__name__)
 
@@ -20,15 +20,18 @@ class VectorStore:
     
     def _initialise_store(self):
         os.makedirs(self.persistent_dir,exist_ok=True)
-        self.client = PersistentClient(
-            path = self.persistent_dir,
-        )
-        self.collection = self.client.get_or_create_collection(
-            name = self.collection_name,
-            metadata={
-                "Description": "This is a multi model collection for storing textual and visual embeddings",
-                "hnsw:space": "cosine"}
-        )
+        try:
+            self.client = PersistentClient(
+                path = self.persistent_dir,
+            )
+            self.collection = self.client.get_or_create_collection(
+                name = self.collection_name,
+                metadata={
+                    "Description": "This is a multi model collection for storing textual and visual embeddings",
+                    "hnsw:space": "cosine"}
+            )
+        except Exception as e:
+            logger.critical("Initialising of Store Failed.")
 
     def add_documents(self,docs,embeddings):
         # print(f"Adding documents and their embedings in vector store")
@@ -46,13 +49,15 @@ class VectorStore:
             metadatas.append(metadata)
             document_text.append(doc.page_content)
             embedding_list.append(embed)
-
-        self.collection.add(
-                ids = ids,
-                embeddings=embedding_list,
-                documents=document_text,
-                metadatas=metadatas,
-            )
+        try:
+            self.collection.add(
+                    ids = ids,
+                    embeddings=embedding_list,
+                    documents=document_text,
+                    metadatas=metadatas,
+                )
+        except Exception as e:
+            logger.critical("Adding Documents to Vectore Store Failed.")
             
     def add_visuals(self,imgs,embeddings):
         # print(f"Adding images and their embedings in vector store")
@@ -72,13 +77,14 @@ class VectorStore:
             caption_text.append(img["caption"])
             img_paths.append(img["image_path"])
             embedding_list.append(embed)
-
-        self.collection.add(
-                ids = ids,
-                embeddings=embedding_list,
-                documents=caption_text,
-                metadatas=metadatas,
-                uris = img_paths
-            )
-
+        try:
+            self.collection.add(
+                    ids = ids,
+                    embeddings=embedding_list,
+                    documents=caption_text,
+                    metadatas=metadatas,
+                    uris = img_paths
+                )
+        except Exception as e:
+                    logger.critical("Adding Documents to Vectore Store Failed.")
 

@@ -1,17 +1,19 @@
+import json
+import logging
 from langchain_ollama import ChatOllama
 from security import OutPutValidator
-from cache import CacheLayer
-import logging
-import json
+from cache import cached
 
 logger = logging.getLogger(__name__)
 outputvalidator = OutPutValidator()
-cached = CacheLayer()
 
-llm = ChatOllama(
-        model="Qwen2.5:3b",
-        temperature=0.1
+try : 
+    llm = ChatOllama(
+            model="Qwen2.5:3b",
+            temperature=0.1
     )
+except ImportError as e:
+    logger.critical("Ollama not initialised")
 
 def multi_query(query:str):
     
@@ -30,14 +32,19 @@ def multi_query(query:str):
         Return strictly a valid JSON object with a single key "queries" containing an array of exactly 2 string queries not any more than that. Do not include any intro, explanation, or markdown backticks outside the JSON.
 
         Example Output:
-        "queries": [
-            "First query variation here",
-            "Second query variation here",
-            "Third query variation here"
-        ]
+        {{
+            "queries": [
+                "First query variation here",
+                "Second query variation here",
+                "Third query variation here"
+            ]
+        }}
         """
     reponse = llm.invoke(multi_query_prompt)
-    data = json.loads(reponse.content)
+    try:
+        data = json.loads(reponse.content)
+    except json.JSONDecodeError as e:
+        logger.critical("The Output is not in JSON")
     sub_queries = data.get("queries",[])
     all_queries = [query] + sub_queries
     logger.info("Creating Multiple Queries out of single Query")
@@ -50,7 +57,7 @@ def generation(retriver,query):
     images = []
     logger.info("Generating Response for All queries...")
     for _ in all_queries:
-        results = retriver.retrieve(query)
+        results = retriver.retrieve(_)
         texts.extend(results["texts"])
         images.extend(results["images"])
     logger.info("Gathering Context from Retriever...")
@@ -98,7 +105,7 @@ def generation(retriver,query):
                     Provide your expert answer:
                     """
         response = llm.invoke(prompt)
-        output, warning = outputvalidator.detect(response)
+        output, warning = outputvalidator.detect(response.content)
         if warning:
             logger.warning(f"OUTPUT GENERATED HAS SEVERAL WARNINGS: {warning}")
         logger.info("Generating Response...")

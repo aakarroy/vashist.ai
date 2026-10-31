@@ -1,7 +1,7 @@
-import ollama
 import time
 import tqdm
 import logging
+import ollama
 
 logger = logging.getLogger(__name__)
 class Embeddings():
@@ -12,7 +12,10 @@ class Embeddings():
         # print("Generating Query Embeddings...")
         logger.info("Generating Query Embeddings...")
         time.sleep(1)
-        response = ollama.embed(model=self.model_name, input=query)
+        try:
+            response = ollama.embed(model=self.model_name, input=query)
+        except Exception as e:
+            logger.critical("Embedding Query Failed.")
         return response["embeddings"][0]
 
     def generate_text_embedding(self,chunks,batch_size=16):
@@ -23,8 +26,11 @@ class Embeddings():
         text_embedding = []
         for i in tqdm.tqdm(range(0,len(chunks),batch_size),desc="Encoding Text Chunks"):
             batch = texts[i:i+batch_size]
-            response = ollama.embed(model=self.model_name,input=batch)
-            text_embedding.extend(response["embeddings"])
+            try:
+                response = ollama.embed(model=self.model_name,input=batch)
+                text_embedding.extend(response["embeddings"])
+            except Exception as e:
+                        logger.critical("Embedding Text Failed.")
         return text_embedding    
 
     def generate_caption_embedding(self,imgs,batch_size=16):
@@ -34,7 +40,10 @@ class Embeddings():
         caption_embedding = []
         for i in tqdm.tqdm(range(0,len(captions),batch_size),desc="Encoding Images Captions"):
             batch = captions[i:i+batch_size]
-            response = ollama.embed(model=self.model_name,input=batch)
-            caption_embedding.extend(response["embeddings"])
+            try:
+                response = ollama.embed(model=self.model_name,input=batch)
+                caption_embedding.extend(response["embeddings"])
+            except Exception as e:
+                        logger.critical("Embedding Captions Failed.")
         return caption_embedding
 

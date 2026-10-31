@@ -2,6 +2,7 @@ import hashlib
 import time
 import logging
 from config import get_settings
+
 logger = logging.getLogger(__name__)
 settings = get_settings()
 
@@ -20,7 +21,7 @@ class CacheLayer:
         key = self._make_key(query)
         if key in self._cache:
             cache = self._cache[key]
-            if time.time() - cache['timestamp'] > self.ttl:
+            if time.time() - cache['timestamp'] < self.ttl:
                 logger.info("Returing Cache Response")
                 return cache['response']
             else:
@@ -30,9 +31,11 @@ class CacheLayer:
 
     def set(self, query:str, response:str):
         logging.info("Set Cache")
-        key = self._make_key(query)
+        key = self._make_key(query)74
         self._cache[key] = {
             "query" : query,
-            "reponse" : response,
+            "response" : response,
             "timestamp" : time.time()
         }
+        # print(self._cache)
+cached = CacheLayer()

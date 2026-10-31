@@ -56,7 +56,8 @@ class OutPutValidator:
         if found:
             warnings.append(found.keys)
             masked = self.piidetector.mask(text)
-
+        else:
+            masked = text
         for p in self.HARMFULL_PATTERNS:
             if(re.search(p,text)):
                 warnings.append("Harmfull Content Blocked")
