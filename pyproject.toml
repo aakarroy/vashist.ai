@@ -1,7 +1,55 @@
 [project]
-name = "vashist"
+name = "vashist-ai"
 version = "0.1.0"
-description = "Add your description here"
+description = "A fully local, privacy-first multimodal RAG study assistant. Ingest PDFs, PowerPoint slides, and web URLs, then chat with a locally running LLM grounded in your study material."
 readme = "README.md"
+license = { file = "LICENSE" }
+authors = [
+    { name = "Aakar Roy" }
+]
 requires-python = ">=3.14"
-dependencies = []
+keywords = ["rag", "llm", "ollama", "chromadb", "langchain", "study-assistant", "multimodal", "local-ai"]
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "Intended Audience :: Education",
+    "Intended Audience :: Developers",
+    "License :: OSI Approved :: MIT License",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.14",
+    "Topic :: Scientific/Engineering :: Artificial Intelligence",
+    "Topic :: Education",
+]
+dependencies = [
+    "langchain",
+    "langchain-community",
+    "langchain-core",
+    "langchain-ollama",
+    "langchain-text-splitters",
+    "httpx",
+    "PyMuPDF",
+    "unstructured",
+    "python-pptx",
+    "tiktoken",
+    "transformers==4.40.2",
+    "torch",
+    "torchvision",
+    "pillow",
+    "einops",
+    "timm",
+    "chromadb",
+    "open-clip-torch",
+    "tqdm",
+    "ollama",
+    "pydantic-settings",
+    "python-dotenv",
+    "requests",
+    "beautifulsoup4",
+    "nltk",
+]
+
+[project.urls]
+Repository = "https://github.com/aakarroy/vashist.ai"
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
