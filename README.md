@@ -156,6 +156,7 @@ vashist.ai/
 |
 +-- src/
 |   +-- main.py              # Entry point -- orchestrates the full pipeline
+|   +-- setup.py             # Interactive setup script (venv, dependencies, models)
 |   +-- config.py            # Pydantic-settings configuration singleton
 |   +-- document_loader.py   # Multi-format loader (PDF, PPTX, URL + images)
 |   +-- captioner.py         # Image captioning using microsoft/git-base
@@ -186,6 +187,18 @@ vashist.ai/
 ---
 
 ## Module Breakdown
+
+### `src/setup.py` -- Interactive Environment & Model Setup
+
+An interactive setup CLI script that automates project initialization step-by-step with user confirmation prompts (`Y/N`) before executing each stage:
+
+1. **Virtual Environment Setup** — Checks whether `.venv` exists at the project root; if absent, creates one using `python -m venv .venv`.
+2. **Environment Python Resolution** — Locates the OS-specific Python executable inside `.venv` (`Scripts/python.exe` on Windows, `bin/python` on Linux/macOS/WSL).
+3. **Dependency Installation** — Installs project dependencies from `requirements.txt` into `.venv` using `pip install -r requirements.txt`.
+4. **Custom Ollama Model Creation** — Builds the custom `vashistAI` model from `Modelfile` via `ollama create vashistAI -f Modelfile`.
+5. **Model Downloads** — Pulls the required embedding model (`nomic-embed-text`) and default LLM (`qwen2.5:3b`) using Ollama.
+
+---
 
 ### `src/main.py` -- Entry Point
 
@@ -426,6 +439,9 @@ This phase runs on every invocation once the vector store exists.
 ---
 
 ## Getting Started
+
+> [!TIP]
+> **Automated Setup Available:** You can run `python src/setup.py` from the project root after cloning to interactively create `.venv`, install dependencies from `requirements.txt`, build the custom `vashistAI` model, and pull the required Ollama models.
 
 ### Prerequisites
 
