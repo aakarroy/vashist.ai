@@ -28,10 +28,13 @@ logger = logging.getLogger(__name__)
 load_dotenv()
 
 def main():
-"""Getting Sources"""
+    """Getting Sources"""
     PARENT_DIR = r"vashist.ai\data"
     try:
         sources = [os.path.join(PARENT_DIR,_) for _ in os.listdir(PARENT_DIR)] #list containing all the data uploaded by the user. .pdf, .pptx and urls only
+        api_key = settings.jina_api_key
+        if(api_key==""):
+            print("No JINA API KEY found. URLLoader will not work. Skipping URLS") # add URL skipping ka code
         sources.append(r"https://openai.com/index/gpt-4/")
         sources.append(r"https://www.anthropic.com/news/model-context-protocol")
         sources.append(r"https://www.pinecone.io/learn/retrieval-augmented-generation/")
