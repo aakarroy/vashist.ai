@@ -7,7 +7,7 @@ PyMuPdf
 unstructured
 python-pptx
 tiktoken
-transformers==4.40.2
+transformers
 torch
 torchvision
 pillow
@@ -29,3 +29,4 @@ msoffcrypto-tool
 pdfminer.six
 nltk
 logging
+rich

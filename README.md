@@ -4,7 +4,7 @@
 
 ### Your Personal AI Study Companion Powered by Local LLMs
 
-[![Python](https://img.shields.io/badge/Python-3.14+-3776AB?style=for-the-badge&logo=python&logoColor=white)](https://python.org)
+[![Python](https://img.shields.io/badge/Python-3.12+-3776AB?style=for-the-badge&logo=python&logoColor=white)](https://python.org)
 [![Ollama](https://img.shields.io/badge/Ollama-Local%20LLM-black?style=for-the-badge&logo=ollama&logoColor=white)](https://ollama.com)
 [![ChromaDB](https://img.shields.io/badge/ChromaDB-Vector%20DB-FF6B35?style=for-the-badge)](https://www.trychroma.com)
 [![LangChain](https://img.shields.io/badge/LangChain-Orchestration-1C3C3C?style=for-the-badge&logo=langchain&logoColor=white)](https://langchain.com)
@@ -180,7 +180,7 @@ vashist.ai/
 +-- .env.example             # Template for environment variables
 +-- requirements.txt         # Python dependencies
 +-- pyproject.toml           # Project metadata and build configuration
-+-- .python-version          # Required Python version pin (3.14)
++-- .python-version          # Required Python version pin (3.12)
 +-- LICENSE                  # MIT License
 ```
 
@@ -447,7 +447,7 @@ This phase runs on every invocation once the vector store exists.
 
 | Requirement | Details |
 |---|---|
-| **Python** | 3.14 (pinned in `.python-version`) |
+| **Python** | 3.12 (pinned in `.python-version`) |
 | **Ollama** | Must be installed and running locally on the default port |
 | **CUDA GPU** (optional) | Required for fast image captioning; CPU fallback is available with a confirmation prompt |
 | **Jina API Key** | Required only for URL ingestion; free tier available at [jina.ai](https://jina.ai) |

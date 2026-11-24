@@ -9,3 +9,4 @@ cli
 ndcg.py
 UI/
 src/__pycache__/
+src/vashist.db*
