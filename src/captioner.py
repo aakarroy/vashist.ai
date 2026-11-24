@@ -7,29 +7,33 @@ from transformers import AutoProcessor, AutoModelForCausalLM
 
 logger = logging.getLogger(__name__)
 
+
+class CPUOnlyError(RuntimeError):
+    """Raised when CaptionGenerator detects CPU-only environment and needs user confirmation."""
+    pass
+
+
 class CaptionGenerator:
-    def __init__(self,model_name="microsoft/git-base"):
+    def __init__(self, model_name="microsoft/git-base", allow_cpu=False):
         # print(f"Generating Captions via {model_name}")
         logger.info(f"Generating Captions via {model_name}")
-        self.device = ("cuda" if torch.cuda.is_available() else "cpu")
-        if(self.device=="cpu"):
-            # print()'
+        self.device = "cuda" if torch.cuda.is_available() else "cpu"
+        if self.device == "cpu" and not allow_cpu:
             logger.error("No GPU Found")
-            logger.warning("CPU is being used, which will results in longer wait time\n Kindly check hardware requirements and drivers to proceed.")
-            choice = input("Still want to proceed? Y/N").strip().upper()
-            if(choice!="Y"):
-                quit()
+            logger.warning("CPU is being used, which will result in longer wait time. Check hardware requirements and drivers.")
+            raise CPUOnlyError("GPU not available. Set allow_cpu=True to proceed on CPU.")
 
         self.torch_dtype = torch.float16 if self.device == "cuda" else torch.float32
         try:
             self.processor = AutoProcessor.from_pretrained(model_name, trust_remote_code=True)
             self.model = AutoModelForCausalLM.from_pretrained(
-                    model_name, 
-                    torch_dtype=self.torch_dtype,
-                    trust_remote_code=True
+                model_name,
+                torch_dtype=self.torch_dtype,
+                trust_remote_code=True
             ).to(self.device)
         except Exception as e:
             logger.critical("Loading Captioning Model Failed.")
+            raise
 
     def generate_caption(self,imgs):
         min_kb = 5

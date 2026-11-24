@@ -48,7 +48,6 @@ def multi_query(query:str):
     sub_queries = data.get("queries",[])
     all_queries = [query] + sub_queries
     logger.info("Creating Multiple Queries out of single Query")
-    print(all_queries)
     return list(set([all_queries[0],all_queries[1],all_queries[2]]))    
 
 def generation(retriver,query):

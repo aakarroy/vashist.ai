@@ -31,7 +31,7 @@ class CacheLayer:
 
     def set(self, query:str, response:str):
         logging.info("Set Cache")
-        key = self._make_key(query)74
+        key = self._make_key(query)
         self._cache[key] = {
             "query" : query,
             "response" : response,

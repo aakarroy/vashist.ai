@@ -78,7 +78,7 @@ def main():
         found = piidetector.detect(query)
         if found:
             logger.warning(f"PII Detected of Type : {found}")
-                query = piidetector.mask(query)
+            query = piidetector.mask(query)
         # print(cached._cache)
             if(cached.get(query) is None):
                 generation(retriever,query)

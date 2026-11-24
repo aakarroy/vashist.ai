@@ -1,3 +1,4 @@
+UNSTRUCTURED_DISABLE_NOTICE=1
 import os 
 import uuid
 import requests
