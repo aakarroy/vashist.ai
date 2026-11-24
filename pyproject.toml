@@ -7,7 +7,7 @@ license = { file = "LICENSE" }
 authors = [
     { name = "Aakar Roy" }
 ]
-requires-python = ">=3.14"
+requires-python = ">=3.12"
 keywords = ["rag", "llm", "ollama", "chromadb", "langchain", "study-assistant", "multimodal", "local-ai"]
 classifiers = [
     "Development Status :: 3 - Alpha",
@@ -15,7 +15,7 @@ classifiers = [
     "Intended Audience :: Developers",
     "License :: OSI Approved :: MIT License",
     "Programming Language :: Python :: 3",
-    "Programming Language :: Python :: 3.14",
+    "Programming Language :: Python :: 3.12",
     "Topic :: Scientific/Engineering :: Artificial Intelligence",
     "Topic :: Education",
 ]
